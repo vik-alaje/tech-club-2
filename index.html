@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tech Club Launch | SYSTEM_READY</title>
+    <title>Tech Club Launch | Aivancity</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -121,6 +121,10 @@
             transition: opacity 0.5s ease-in-out;
             will-change: opacity;
         }
+
+        input::placeholder {
+            color: #475569;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -129,14 +133,39 @@
     <div class="scanline"></div>
     <div class="vignette"></div>
 
-    <!-- Start Screen -->
-    <div id="start-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black p-4">
-        <div class="pixel-font text-4xl md:text-6xl text-white mb-6 glitch" data-text="TECH_CLUB">TECH_CLUB</div>
-        <div class="pixel-font text-xs md:text-sm text-indigo-400 mb-12 tracking-widest">EST. 2026 // CAMPUS_LAUNCH_INIT</div>
+    <!-- Start / Setup Screen -->
+    <div id="setup-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black p-4">
+        <div class="pixel-font text-3xl md:text-5xl text-white mb-2 glitch" data-text="CLUB_TECH" id="setup-title">CLUB_TECH</div>
+        <div class="pixel-font text-[10px] md:text-xs text-indigo-400 mb-12 tracking-widest" id="setup-subtitle">AIVANCITY SCHOOL OF TECHNOLOGY</div>
         
-        <button id="start-btn" onclick="startBoot()" class="group relative px-8 py-4 bg-indigo-600 text-white font-bold pixel-font text-xs hover:bg-indigo-500 transition-all btn-pixel">
-            <span class="relative z-10">INITIALIZE SYSTEM</span>
-        </button>
+        <div class="game-card p-6 md:p-8 w-full max-w-md space-y-6">
+            <div class="space-y-2">
+                <label class="pixel-font text-[10px] text-green-400 block mb-2" id="label-name">ID_UTILISATEUR (NOM):</label>
+                <input type="text" id="player-name" class="w-full bg-slate-900 border-2 border-slate-700 text-white p-3 font-mono focus:border-indigo-500 focus:outline-none" placeholder="Entrez votre nom...">
+            </div>
+
+            <div class="space-y-2">
+                <label class="pixel-font text-[10px] text-green-400 block mb-2" id="label-lang">LANGUE_SYSTÈME:</label>
+                <div class="flex gap-4">
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="lang" value="fr" class="peer hidden" checked>
+                        <div class="text-center p-3 border-2 border-slate-700 bg-slate-900 peer-checked:border-indigo-500 peer-checked:text-indigo-400 hover:bg-slate-800 transition-colors pixel-font text-xs">
+                            FRANÇAIS
+                        </div>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="lang" value="en" class="peer hidden">
+                        <div class="text-center p-3 border-2 border-slate-700 bg-slate-900 peer-checked:border-indigo-500 peer-checked:text-indigo-400 hover:bg-slate-800 transition-colors pixel-font text-xs">
+                            ENGLISH
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button id="start-btn" onclick="startBoot()" class="w-full group relative px-8 py-4 bg-indigo-600 text-white font-bold pixel-font text-xs hover:bg-indigo-500 transition-all btn-pixel mt-4">
+                <span class="relative z-10" id="btn-init-text">INITIALISER SYSTÈME</span>
+            </button>
+        </div>
     </div>
 
     <!-- Boot Sequence Overlay -->
@@ -155,11 +184,11 @@
             <div class="game-card p-4 pointer-events-auto transform hover:scale-105 transition-transform">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-indigo-900 border-2 border-indigo-500 flex items-center justify-center relative overflow-hidden">
-                        <div class="pixel-font text-xl text-white">C</div>
+                        <div class="pixel-font text-xl text-white" id="avatar-initial">U</div>
                         <div class="absolute bottom-0 w-full h-1 bg-green-500 animate-pulse"></div>
                     </div>
                     <div>
-                        <div class="pixel-font text-[10px] text-indigo-300 mb-1">USER: CHRIS_TAHAN</div>
+                        <div class="pixel-font text-[10px] text-indigo-300 mb-1" id="hud-username">USER: GUEST</div>
                         <div class="flex items-center gap-2">
                             <div class="text-[10px] text-green-400">LVL 1</div>
                             <div class="w-24 h-3 bg-slate-900 border border-slate-700 relative">
@@ -173,7 +202,7 @@
             <!-- Event Status -->
             <div class="hidden md:block game-card p-4 pointer-events-auto">
                 <div class="text-right">
-                    <div class="pixel-font text-[10px] text-red-500 animate-pulse">LIVE EVENT IN:</div>
+                    <div class="pixel-font text-[10px] text-red-500 animate-pulse" id="hud-status">LIVE EVENT IN:</div>
                     <div class="text-xl font-bold font-mono text-white mt-1">JAN 15 <span class="text-slate-500">|</span> 18:00</div>
                 </div>
             </div>
@@ -187,15 +216,14 @@
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
                     <svg class="w-32 h-32 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v2h2v-2zm0-8H9v6h2V5z"/></svg>
                 </div>
-                <h2 class="pixel-font text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 mb-8 glitch" data-text="01. THE_VISION">01. THE_VISION</h2>
+                <h2 class="pixel-font text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 mb-8 glitch" data-text="01. THE_VISION" id="vision-title">01. THE_VISION</h2>
                 
                 <div class="grid md:grid-cols-2 gap-8">
                     <div class="space-y-4 text-slate-300 text-sm md:text-base leading-relaxed">
-                        <p class="border-l-2 border-indigo-500 pl-4">
-                            System Check: <span class="text-green-400">PASS</span>. <br>
-                            Traditional education focuses on theory. We focus on <span class="text-white font-bold">shipping code</span>.
+                        <p class="border-l-2 border-indigo-500 pl-4" id="vision-text-1">
+                            A community for students to discuss tech, learn about the ecosystem, grow, and build projects together.
                         </p>
-                        <p>This is a personal initiative by the founding team to create a space where builders build. We are preparing to launch a <span class="text-indigo-400">Google Developer Group</span> chapter.</p>
+                        <p id="vision-text-2">This is a personal initiative by the founding team to create a space where builders build. We mainly use Python.</p>
                     </div>
                     <div class="bg-slate-950 p-6 rounded border border-slate-800 font-mono text-xs md:text-sm shadow-inner">
                         <div class="flex gap-2 mb-4">
@@ -203,12 +231,11 @@
                             <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                             <div class="w-3 h-3 rounded-full bg-green-500"></div>
                         </div>
-                        <p class="text-purple-400">class</p> <span class="text-yellow-300">TechClub</span> {
-                        <br>&nbsp;&nbsp;<span class="text-purple-400">constructor</span>() {
-                        <br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">this</span>.goals = [<span class="text-green-300">'Innovate'</span>, <span class="text-green-300">'Collaborate'</span>];
-                        <br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">this</span>.status = <span class="text-green-300">'LAUNCHING...'</span>;
-                        <br>&nbsp;&nbsp;}
-                        <br>}
+                        <p class="text-purple-400">class</p> <span class="text-yellow-300">TechClub</span>:
+                        <br>&nbsp;&nbsp;<span class="text-purple-400">def</span> <span class="text-blue-400">__init__</span>(self):
+                        <br>&nbsp;&nbsp;&nbsp;&nbsp;self.goals = [<span class="text-green-300">'Learn'</span>, <span class="text-green-300">'Build'</span>, <span class="text-green-300">'Grow'</span>]
+                        <br>&nbsp;&nbsp;&nbsp;&nbsp;self.stack = <span class="text-green-300">'Python'</span>
+                        <br>&nbsp;&nbsp;&nbsp;&nbsp;self.status = <span class="text-green-300">'OPEN'</span>
                     </div>
                 </div>
             </section>
@@ -216,12 +243,12 @@
             <!-- Showcase Grid -->
             <section class="reveal">
                 <div class="flex items-end justify-between mb-8 border-b border-slate-800 pb-4">
-                    <h2 class="pixel-font text-xl md:text-2xl text-green-400 glitch" data-text="02. SHOWCASE">02. SHOWCASE</h2>
-                    <div class="text-xs font-mono text-slate-500">5_SLOTS_FILLED</div>
+                    <h2 class="pixel-font text-xl md:text-2xl text-green-400 glitch" data-text="02. SHOWCASE" id="showcase-title">02. SHOWCASE</h2>
+                    <div class="text-xs font-mono text-slate-500">FEATURED_PROJECT_LOADED</div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Project 1 (Your IDE) -->
+                    <!-- Featured Project -->
                     <div class="game-card p-6 col-span-1 md:col-span-2 hover:border-green-400 transition-colors group cursor-pointer relative overflow-hidden">
                         <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
                         <div class="relative z-10">
@@ -229,54 +256,38 @@
                                 <span class="px-2 py-1 bg-green-900/50 border border-green-500 text-green-400 text-[10px] pixel-font">FEATURED</span>
                                 <span class="text-slate-500 text-xs font-mono">ID: #001</span>
                             </div>
-                            <h3 class="text-xl font-bold text-white mb-2">Adaptive IDE Interface</h3>
-                            <p class="text-slate-400 text-sm mb-4">A personalized development environment that uses heuristics to learn your workflow and auto-suggests toolbar layouts.</p>
+                            <h3 class="text-xl font-bold text-white mb-2" id="proj-1-title">Building with AIBuilder</h3>
+                            <p class="text-slate-400 text-sm mb-4" id="proj-1-desc">A deep dive into creating intelligent applications using AIBuilder. See how we automate workflows and generate code.</p>
                             <div class="flex gap-2 text-[10px] font-mono">
                                 <span class="bg-slate-800 px-2 py-1 rounded text-blue-400">PYTHON</span>
-                                <span class="bg-slate-800 px-2 py-1 rounded text-yellow-400">AI/ML</span>
+                                <span class="bg-slate-800 px-2 py-1 rounded text-yellow-400">AI</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Project 2 -->
-                    <div class="game-card p-6 hover:border-blue-400 transition-colors group">
+                    <!-- Project 2 (Unavailable) -->
+                    <div class="game-card p-6 border-slate-700 opacity-50">
                         <div class="flex justify-between items-start mb-4">
-                            <span class="text-blue-500 text-[10px] pixel-font">WEB_APP</span>
+                            <span class="text-slate-500 text-[10px] pixel-font">LOCKED</span>
                         </div>
-                        <h3 class="text-lg font-bold text-white mb-2">Campus Event Map</h3>
-                        <p class="text-slate-400 text-xs mb-4">Real-time visualization of campus hotspots.</p>
-                        <div class="h-1 w-full bg-slate-800 rounded overflow-hidden">
-                            <div class="h-full bg-blue-500 w-3/4"></div>
-                        </div>
+                        <h3 class="text-lg font-bold text-slate-500 mb-2">Project Beta</h3>
+                        <p class="text-slate-600 text-xs mb-4">Content currently unavailable.</p>
                     </div>
 
-                    <!-- Project 3 -->
-                    <div class="game-card p-6 hover:border-pink-400 transition-colors group">
+                    <!-- Project 3 (Unavailable) -->
+                    <div class="game-card p-6 border-slate-700 opacity-50">
                         <div class="flex justify-between items-start mb-4">
-                            <span class="text-pink-500 text-[10px] pixel-font">GAME_DEV</span>
+                            <span class="text-slate-500 text-[10px] pixel-font">LOCKED</span>
                         </div>
-                        <h3 class="text-lg font-bold text-white mb-2">2D Physics Engine</h3>
-                        <p class="text-slate-400 text-xs mb-4">Built from scratch in C++.</p>
-                         <div class="h-1 w-full bg-slate-800 rounded overflow-hidden">
-                            <div class="h-full bg-pink-500 w-1/2"></div>
-                        </div>
-                    </div>
-
-                    <!-- Project 4 & 5 placeholders -->
-                    <div class="game-card p-6 border-slate-700 opacity-75">
-                         <h3 class="text-lg font-bold text-slate-500 mb-2">Project Delta</h3>
-                         <p class="text-slate-600 text-xs">Computer Vision Attendence</p>
-                    </div>
-                     <div class="game-card p-6 border-slate-700 opacity-75">
-                         <h3 class="text-lg font-bold text-slate-500 mb-2">Project Epsilon</h3>
-                         <p class="text-slate-600 text-xs">Decentralized Voting App</p>
+                        <h3 class="text-lg font-bold text-slate-500 mb-2">Project Gamma</h3>
+                        <p class="text-slate-600 text-xs mb-4">Content currently unavailable.</p>
                     </div>
                 </div>
             </section>
 
             <!-- Schedule / Quest Log -->
             <section class="reveal max-w-3xl mx-auto">
-                <h2 class="pixel-font text-xl text-center text-yellow-400 mb-12 glitch" data-text="03. QUEST_LOG">03. QUEST_LOG</h2>
+                <h2 class="pixel-font text-xl text-center text-yellow-400 mb-12 glitch" data-text="03. QUEST_LOG" id="quest-title">03. QUEST_LOG</h2>
                 
                 <div class="relative pl-8 border-l-2 border-slate-800 space-y-12">
                     <!-- Timeline Item -->
@@ -285,22 +296,22 @@
                             <div class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
                         </div>
                         <div class="text-indigo-400 font-mono text-sm mb-1">18:00 - 18:10</div>
-                        <h3 class="text-white font-bold text-lg">System Boot & Vision</h3>
-                        <p class="text-slate-500 text-sm mt-2">Introduction by Chris Tahan & Founding Team.</p>
+                        <h3 class="text-white font-bold text-lg" id="event-1-title">System Boot & Vision</h3>
+                        <p class="text-slate-500 text-sm mt-2" id="event-1-desc">Introduction by Chris Tahan & Founding Team.</p>
                     </div>
 
                     <div class="relative">
                         <div class="absolute -left-[41px] top-0 w-5 h-5 bg-black border-2 border-slate-600 rounded-full"></div>
                         <div class="text-green-400 font-mono text-sm mb-1">18:10 - 18:50</div>
-                        <h3 class="text-white font-bold text-lg">Lightning Showcase</h3>
-                        <p class="text-slate-500 text-sm mt-2">5 Demos. 8 Minutes Each. Pure Code.</p>
+                        <h3 class="text-white font-bold text-lg" id="event-2-title">Lightning Showcase</h3>
+                        <p class="text-slate-500 text-sm mt-2" id="event-2-desc">Building with AIBuilder & Project Demos.</p>
                     </div>
 
                      <div class="relative">
                         <div class="absolute -left-[41px] top-0 w-5 h-5 bg-black border-2 border-slate-600 rounded-full"></div>
                         <div class="text-pink-400 font-mono text-sm mb-1">18:50 - 19:00</div>
-                        <h3 class="text-white font-bold text-lg">Networking Protocol</h3>
-                        <p class="text-slate-500 text-sm mt-2">Mixer and team formation.</p>
+                        <h3 class="text-white font-bold text-lg" id="event-3-title">Next Steps</h3>
+                        <p class="text-slate-500 text-sm mt-2" id="event-3-desc">Discussing the next event & future plans.</p>
                     </div>
                 </div>
             </section>
@@ -322,20 +333,20 @@
                 </div>
                 <div class="flex items-center px-4 py-2 border-t border-slate-800">
                     <span class="text-green-500 mr-2">$</span>
-                    <input type="text" id="terminal-input" class="bg-transparent border-none text-white w-full font-mono focus:outline-none" autocomplete="off" spellcheck="false" autofocus>
+                    <input type="text" id="terminal-input" class="bg-transparent border-none text-white w-full font-mono focus:outline-none" autocomplete="off" spellcheck="false">
                 </div>
             </section>
 
              <!-- Final CTA -->
             <section id="join" class="text-center space-y-8 pb-32 reveal">
-                <div class="pixel-font text-sm md:text-xl text-slate-400">SYSTEM READY FOR NEW USERS</div>
+                <div class="pixel-font text-sm md:text-xl text-slate-400" id="cta-title">SYSTEM READY FOR NEW USERS</div>
                 <div class="flex flex-col md:flex-row gap-6 justify-center">
-                    <a href="#" class="btn-pixel pixel-font text-[10px] md:text-xs text-black bg-green-500 hover:bg-green-400 p-4">JOIN_DISCORD_SERVER</a>
-                    <a href="#" class="btn-pixel pixel-font text-[10px] md:text-xs text-white bg-transparent border-2 border-white hover:bg-white hover:text-black p-4">REGISTER_ATTENDANCE</a>
+                    <a href="https://forms.office.com/e/HCjqi3C7uy" target="_blank" class="btn-pixel pixel-font text-[10px] md:text-xs text-black bg-green-500 hover:bg-green-400 p-4" id="btn-join">JOIN_CLUB</a>
+                    <a href="https://forms.office.com/e/HCjqi3C7uy" target="_blank" class="btn-pixel pixel-font text-[10px] md:text-xs text-white bg-transparent border-2 border-white hover:bg-white hover:text-black p-4" id="btn-attend">REGISTER_ATTENDANCE</a>
                 </div>
                 <div class="text-slate-600 text-[10px] font-mono mt-12">
-                    INITIATIVE_LEADS: CHRIS_TAHAN & VICTORIA_C_ALAJEMBA<br>
-                    CAMPUS_ID: 2026-TC
+                    INITIATIVE_LEADS: CHRIS TAHAN & VICTORIA C. ALAJEMBA<br>
+                    AIVANCITY SCHOOL OF TECHNOLOGY
                 </div>
             </section>
 
@@ -343,52 +354,162 @@
     </div>
 
     <script>
+        // --- TRANSLATION DATA ---
+        const i18n = {
+            en: {
+                setupTitle: "TECH_CLUB",
+                setupSubtitle: "AIVANCITY SCHOOL OF TECHNOLOGY",
+                labelName: "USER_ID (NAME):",
+                placeholderName: "Enter username...",
+                labelLang: "SYSTEM_LANG:",
+                btnInit: "INITIALIZE SYSTEM",
+                visionTitle: "01. THE_VISION",
+                visionText1: "A community for students to discuss tech, learn about the ecosystem, grow, and build projects together.",
+                visionText2: "This is a personal initiative by the founding team to create a space where builders build. We mainly use Python.",
+                showcaseTitle: "02. SHOWCASE",
+                proj1Title: "Building with AIBuilder",
+                proj1Desc: "A deep dive into creating intelligent applications using AIBuilder. See how we automate workflows and generate code.",
+                questTitle: "03. QUEST_LOG",
+                event1Title: "System Boot & Vision",
+                event1Desc: "Introduction by Chris Tahan & Founding Team.",
+                event2Title: "Lightning Showcase",
+                event2Desc: "Building with AIBuilder & Project Demos.",
+                event3Title: "Next Steps",
+                event3Desc: "Discussing the next event & future plans.",
+                ctaTitle: "SYSTEM READY FOR NEW USERS",
+                btnJoin: "JOIN_CLUB",
+                btnAttend: "REGISTER_ATTENDANCE"
+            },
+            fr: {
+                setupTitle: "CLUB_TECH",
+                setupSubtitle: "AIVANCITY SCHOOL OF TECHNOLOGY",
+                labelName: "ID_UTILISATEUR (NOM):",
+                placeholderName: "Entrez votre nom...",
+                labelLang: "LANGUE_SYSTÈME:",
+                btnInit: "INITIALISER SYSTÈME",
+                visionTitle: "01. LA_VISION",
+                visionText1: "Une communauté pour discuter tech, comprendre l'écosystème, grandir et construire des projets ensemble.",
+                visionText2: "Une initiative personnelle de l'équipe fondatrice pour créer un espace où les bâtisseurs bâtissent. Nous utilisons principalement Python.",
+                showcaseTitle: "02. DÉMOS",
+                proj1Title: "Construire avec AIBuilder",
+                proj1Desc: "Plongée dans la création d'applications intelligentes avec AIBuilder. Découvrez l'automatisation et la génération de code.",
+                questTitle: "03. PROGRAMME",
+                event1Title: "Démarrage & Vision",
+                event1Desc: "Introduction par Chris Tahan & l'équipe fondatrice.",
+                event2Title: "Showcase Éclair",
+                event2Desc: "Création avec AIBuilder & Démos de projets.",
+                event3Title: "Prochaines Étapes",
+                event3Desc: "Discussion sur le prochain événement et le futur.",
+                ctaTitle: "SYSTÈME PRÊT POUR NOUVEAUX UTILISATEURS",
+                btnJoin: "REJOINDRE_LE_CLUB",
+                btnAttend: "ENREGISTRER_PRÉSENCE"
+            }
+        };
+
+        // --- GLOBAL STATE ---
+        let userData = {
+            name: "GUEST",
+            lang: "fr" // Default to French
+        };
+
+        // --- UI UPDATER ---
+        function updateSetupUI() {
+            const t = i18n[userData.lang];
+            
+            // Setup Screen Elements
+            const title = document.getElementById('setup-title');
+            title.innerText = t.setupTitle;
+            title.setAttribute('data-text', t.setupTitle);
+            
+            document.getElementById('setup-subtitle').innerText = t.setupSubtitle;
+            document.getElementById('label-name').innerText = t.labelName;
+            document.getElementById('player-name').placeholder = t.placeholderName;
+            document.getElementById('label-lang').innerText = t.labelLang;
+            document.getElementById('btn-init-text').innerText = t.btnInit;
+
+            // Game Elements (Pre-load text)
+            document.getElementById('vision-title').setAttribute('data-text', t.visionTitle);
+            document.getElementById('vision-title').innerText = t.visionTitle;
+            document.getElementById('vision-text-1').innerText = t.visionText1;
+            document.getElementById('vision-text-2').innerText = t.visionText2;
+            
+            document.getElementById('showcase-title').setAttribute('data-text', t.showcaseTitle);
+            document.getElementById('showcase-title').innerText = t.showcaseTitle;
+            document.getElementById('proj-1-title').innerText = t.proj1Title;
+            document.getElementById('proj-1-desc').innerText = t.proj1Desc;
+            
+            document.getElementById('quest-title').setAttribute('data-text', t.questTitle);
+            document.getElementById('quest-title').innerText = t.questTitle;
+            
+            document.getElementById('event-1-title').innerText = t.event1Title;
+            document.getElementById('event-1-desc').innerText = t.event1Desc;
+            document.getElementById('event-2-title').innerText = t.event2Title;
+            document.getElementById('event-2-desc').innerText = t.event2Desc;
+            document.getElementById('event-3-title').innerText = t.event3Title;
+            document.getElementById('event-3-desc').innerText = t.event3Desc;
+            
+            document.getElementById('cta-title').innerText = t.ctaTitle;
+            document.getElementById('btn-join').innerText = t.btnJoin;
+            document.getElementById('btn-attend').innerText = t.btnAttend;
+        }
+
+        // Add Listeners for Language Toggle
+        document.querySelectorAll('input[name="lang"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                userData.lang = e.target.value;
+                updateSetupUI();
+            });
+        });
+
         // --- BOOT SEQUENCE LOGIC ---
         const bootText = [
             "Initializing kernel...",
             "Loading GPU drivers... OK",
             "Mounting file system... OK",
-            "Connecting to Campus Network... SUCCESS",
-            "Checking user permissions... ADMIN",
+            "Connecting to Aivancity Network... SUCCESS",
+            "Checking user permissions... ACCESS GRANTED",
             "Loading assets...",
-            "Executing launch_event.exe...",
+            "Executing launch_event.py...",
             "WELCOME TO TECH CLUB."
         ];
 
         async function startBoot() {
+            // 1. Capture User Input
+            const nameInput = document.getElementById('player-name').value;
+            if (nameInput.trim() !== "") {
+                userData.name = nameInput.toUpperCase();
+            }
+            
+            // Update User Name in HUD
+            document.getElementById('hud-username').innerText = `USER: ${userData.name}`;
+            document.getElementById('avatar-initial').innerText = userData.name.charAt(0);
+
+            // 3. Start Animation Sequence
             const startBtn = document.getElementById('start-btn');
-            const startScreen = document.getElementById('start-screen');
+            const setupScreen = document.getElementById('setup-screen');
             const bootScreen = document.getElementById('boot-screen');
             const bootContent = document.getElementById('boot-text');
             const gameUI = document.getElementById('game-ui');
 
-            // Disable button
             if(startBtn) startBtn.style.pointerEvents = 'none';
 
-            // Show Boot Screen
-            startScreen.classList.add('hidden');
+            setupScreen.classList.add('hidden');
             bootScreen.classList.remove('hidden');
             bootScreen.style.display = 'flex';
 
-            // Run Sequence
             for (let line of bootText) {
                 const p = document.createElement('div');
                 p.textContent = `> ${line}`;
                 bootContent.appendChild(p);
-                await new Promise(r => setTimeout(r, Math.random() * 300 + 50));
+                await new Promise(r => setTimeout(r, Math.random() * 200 + 50));
             }
 
             await new Promise(r => setTimeout(r, 600));
             
-            // --- CRITICAL VISIBILITY FORCE ---
-            // 1. Hide Boot Screen
             bootScreen.style.display = 'none'; 
-            
-            // 2. Force Game UI Visibility directly via style
             gameUI.style.opacity = '1';
             gameUI.style.pointerEvents = 'auto';
             
-            // 3. Trigger Resize to fix any canvas issues
             if (typeof resize === 'function') resize();
         }
 
@@ -399,7 +520,6 @@
         function initGame() {
             canvas = document.getElementById('game-canvas');
             if(!canvas) return;
-            
             ctx = canvas.getContext('2d');
             resize();
             initParticles();
@@ -439,7 +559,6 @@
             }
             update() {
                 if(!mouse.x) return;
-                
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
                 let distance = Math.sqrt(dx*dx + dy*dy);
@@ -479,7 +598,6 @@
         function animate() {
             if(!ctx || !canvas) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
             ctx.lineWidth = 1;
             for(let i = 0; i < particles.length; i++){
@@ -495,7 +613,6 @@
                     }
                 }
             }
-
             particles.forEach(p => {
                 p.update();
                 p.draw();
@@ -507,14 +624,11 @@
         function handleScroll() {
             const reveals = document.querySelectorAll('.reveal');
             const expBar = document.getElementById('exp-bar');
-            
             const checkScroll = () => {
                 const scrolled = window.scrollY;
                 const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
                 const scrollPercent = (scrolled / maxScroll) * 100;
-                
                 if(expBar) expBar.style.width = scrollPercent + '%';
-
                 reveals.forEach(el => {
                     const top = el.getBoundingClientRect().top;
                     if (top < window.innerHeight - 50) {
@@ -523,8 +637,6 @@
                     }
                 });
             };
-            
-            // Set initial state
             reveals.forEach(el => el.classList.add('transition-all', 'duration-700', 'transform'));
             window.addEventListener('scroll', checkScroll);
             checkScroll(); 
@@ -547,19 +659,14 @@
                     let response = '';
                     switch(command) {
                         case 'help':
-                            response = 'Available commands: help, date, whoami, join, clear, ide';
-                            break;
-                        case 'date':
-                            response = new Date().toString();
+                            response = 'Available commands: help, whoami, join, clear';
                             break;
                         case 'whoami':
-                            response = 'guest_user@university_campus';
+                            response = userData.name;
                             break;
                         case 'join':
-                            response = 'Opening Discord invitation protocol...';
-                            break;
-                        case 'ide':
-                            response = 'Launching Adaptive IDE preview... [ERROR: MISSING_MODULE]';
+                            response = 'Opening Registration Protocol...';
+                            window.open('https://forms.office.com/e/HCjqi3C7uy', '_blank');
                             break;
                         case 'clear':
                             output.innerHTML = '';
@@ -582,22 +689,23 @@
         }
 
         // --- INITIALIZATION ---
-        // Run init immediately on load (hidden) to prevent rendering glitches later
         window.addEventListener('DOMContentLoaded', () => {
             initGame();
+            updateSetupUI(); // Initialize UI with Default Lang (FR)
         });
         
-        // Failsafe: If boot hangs, show UI after 8 seconds
+        // Failsafe: If boot hangs
         setTimeout(() => {
             const gameUI = document.getElementById('game-ui');
             const bootScreen = document.getElementById('boot-screen');
-            if(getComputedStyle(gameUI).opacity === '0') {
-                console.log('Failsafe triggered');
+            const setupScreen = document.getElementById('setup-screen');
+            // Only force if we are NOT on setup screen and Game UI is hidden
+            if(setupScreen.classList.contains('hidden') && getComputedStyle(gameUI).opacity === '0') {
                 bootScreen.style.display = 'none';
                 gameUI.style.opacity = '1';
                 gameUI.style.pointerEvents = 'auto';
             }
-        }, 8000);
+        }, 12000); // Longer timeout to account for setup
 
     </script>
 </body>
