@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Club Launch | SYSTEM_READY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --accent: #22c55e;
+            --bg: #020617;
+            --terminal-bg: #0f172a;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #f8fafc;
+            font-family: 'Fira Code', monospace;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        .pixel-font { font-family: 'Press Start 2P', cursive; }
+
+        /* CRT Screen Effects */
+        .scanline {
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+            background-size: 100% 2px, 3px 100%;
+            position: fixed;
+            pointer-events: none;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: 0 0 150px rgba(0,0,0,0.9) inset;
+            pointer-events: none;
+            z-index: 51;
+        }
+
+        /* Glitch Animation */
+        .glitch {
+            position: relative;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 red;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px;
+            text-shadow: -1px 0 blue;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(11px, 9999px, 83px, 0); }
+            20% { clip: rect(84px, 9999px, 9px, 0); }
+            40% { clip: rect(23px, 9999px, 6px, 0); }
+            60% { clip: rect(62px, 9999px, 63px, 0); }
+            80% { clip: rect(45px, 9999px, 28px, 0); }
+            100% { clip: rect(9px, 9999px, 49px, 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            20% { clip: rect(32px, 9999px, 6px, 0); }
+            40% { clip: rect(89px, 9999px, 86px, 0); }
+            60% { clip: rect(3px, 9999px, 16px, 0); }
+            80% { clip: rect(74px, 9999px, 92px, 0); }
+            100% { clip: rect(12px, 9999px, 56px, 0); }
+        }
+
+        /* Game Card Styling */
+        .game-card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid #4f46e5;
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), 0 0 20px rgba(79, 70, 229, 0.1);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-pixel {
+            clip-path: polygon(
+                0 10px, 10px 10px, 10px 0, 
+                calc(100% - 10px) 0, calc(100% - 10px) 10px, 100% 10px, 
+                100% calc(100% - 10px), calc(100% - 10px) calc(100% - 10px), calc(100% - 10px) 100%, 
+                10px 100%, 10px calc(100% - 10px), 0 calc(100% - 10px)
+            );
+            transition: all 0.2s;
+        }
+        .btn-pixel:hover {
+            transform: scale(1.05);
+            background-color: #6366f1;
+            box-shadow: 0 0 15px #6366f1;
+        }
+
+        /* Boot Sequence */
+        #boot-screen { font-family: 'Fira Code', monospace; color: #22c55e; }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .terminal-input:focus { outline: none; }
+        
+        /* Ensure game-ui is hidden initially but takes up space */
+        #game-ui {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+            will-change: opacity;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- FX Layers -->
+    <div class="scanline"></div>
+    <div class="vignette"></div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black p-4">
+        <div class="pixel-font text-4xl md:text-6xl text-white mb-6 glitch" data-text="TECH_CLUB">TECH_CLUB</div>
+        <div class="pixel-font text-xs md:text-sm text-indigo-400 mb-12 tracking-widest">EST. 2026 // CAMPUS_LAUNCH_INIT</div>
+        
+        <button id="start-btn" onclick="startBoot()" class="group relative px-8 py-4 bg-indigo-600 text-white font-bold pixel-font text-xs hover:bg-indigo-500 transition-all btn-pixel">
+            <span class="relative z-10">INITIALIZE SYSTEM</span>
+        </button>
+    </div>
+
+    <!-- Boot Sequence Overlay -->
+    <div id="boot-screen" class="hidden fixed inset-0 z-[90] bg-black p-8 text-xs md:text-sm overflow-hidden flex flex-col justify-end">
+        <div id="boot-text" class="whitespace-pre-wrap"></div>
+    </div>
+
+    <!-- Main Game UI -->
+    <div id="game-ui">
+        <!-- Canvas Background -->
+        <canvas id="game-canvas" class="fixed top-0 left-0 w-full h-full -z-10"></canvas>
+
+        <!-- HUD -->
+        <div class="fixed top-0 left-0 w-full p-4 flex justify-between items-start z-40 pointer-events-none">
+            <!-- Player Stats -->
+            <div class="game-card p-4 pointer-events-auto transform hover:scale-105 transition-transform">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-900 border-2 border-indigo-500 flex items-center justify-center relative overflow-hidden">
+                        <div class="pixel-font text-xl text-white">C</div>
+                        <div class="absolute bottom-0 w-full h-1 bg-green-500 animate-pulse"></div>
+                    </div>
+                    <div>
+                        <div class="pixel-font text-[10px] text-indigo-300 mb-1">USER: CHRIS_TAHAN</div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-[10px] text-green-400">LVL 1</div>
+                            <div class="w-24 h-3 bg-slate-900 border border-slate-700 relative">
+                                <div id="exp-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-0 transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Status -->
+            <div class="hidden md:block game-card p-4 pointer-events-auto">
+                <div class="text-right">
+                    <div class="pixel-font text-[10px] text-red-500 animate-pulse">LIVE EVENT IN:</div>
+                    <div class="text-xl font-bold font-mono text-white mt-1">JAN 15 <span class="text-slate-500">|</span> 18:00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="relative z-10 pt-[25vh] pb-[10vh] px-4 max-w-5xl mx-auto space-y-40">
+            
+            <!-- Vision Section -->
+            <section class="game-card p-8 md:p-12 relative overflow-hidden group reveal">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                    <svg class="w-32 h-32 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v2h2v-2zm0-8H9v6h2V5z"/></svg>
+                </div>
+                <h2 class="pixel-font text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 mb-8 glitch" data-text="01. THE_VISION">01. THE_VISION</h2>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4 text-slate-300 text-sm md:text-base leading-relaxed">
+                        <p class="border-l-2 border-indigo-500 pl-4">
+                            System Check: <span class="text-green-400">PASS</span>. <br>
+                            Traditional education focuses on theory. We focus on <span class="text-white font-bold">shipping code</span>.
+                        </p>
+                        <p>This is a personal initiative by the founding team to create a space where builders build. We are preparing to launch a <span class="text-indigo-400">Google Developer Group</span> chapter.</p>
+                    </div>
+                    <div class="bg-slate-950 p-6 rounded border border-slate-800 font-mono text-xs md:text-sm shadow-inner">
+                        <div class="flex gap-2 mb-4">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <p class="text-purple-400">class</p> <span class="text-yellow-300">TechClub</span> {
+                        <br>&nbsp;&nbsp;<span class="text-purple-400">constructor</span>() {
+                        <br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">this</span>.goals = [<span class="text-green-300">'Innovate'</span>, <span class="text-green-300">'Collaborate'</span>];
+                        <br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">this</span>.status = <span class="text-green-300">'LAUNCHING...'</span>;
+                        <br>&nbsp;&nbsp;}
+                        <br>}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Showcase Grid -->
+            <section class="reveal">
+                <div class="flex items-end justify-between mb-8 border-b border-slate-800 pb-4">
+                    <h2 class="pixel-font text-xl md:text-2xl text-green-400 glitch" data-text="02. SHOWCASE">02. SHOWCASE</h2>
+                    <div class="text-xs font-mono text-slate-500">5_SLOTS_FILLED</div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Project 1 (Your IDE) -->
+                    <div class="game-card p-6 col-span-1 md:col-span-2 hover:border-green-400 transition-colors group cursor-pointer relative overflow-hidden">
+                        <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="px-2 py-1 bg-green-900/50 border border-green-500 text-green-400 text-[10px] pixel-font">FEATURED</span>
+                                <span class="text-slate-500 text-xs font-mono">ID: #001</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2">Adaptive IDE Interface</h3>
+                            <p class="text-slate-400 text-sm mb-4">A personalized development environment that uses heuristics to learn your workflow and auto-suggests toolbar layouts.</p>
+                            <div class="flex gap-2 text-[10px] font-mono">
+                                <span class="bg-slate-800 px-2 py-1 rounded text-blue-400">PYTHON</span>
+                                <span class="bg-slate-800 px-2 py-1 rounded text-yellow-400">AI/ML</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 2 -->
+                    <div class="game-card p-6 hover:border-blue-400 transition-colors group">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-blue-500 text-[10px] pixel-font">WEB_APP</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Campus Event Map</h3>
+                        <p class="text-slate-400 text-xs mb-4">Real-time visualization of campus hotspots.</p>
+                        <div class="h-1 w-full bg-slate-800 rounded overflow-hidden">
+                            <div class="h-full bg-blue-500 w-3/4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Project 3 -->
+                    <div class="game-card p-6 hover:border-pink-400 transition-colors group">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-pink-500 text-[10px] pixel-font">GAME_DEV</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">2D Physics Engine</h3>
+                        <p class="text-slate-400 text-xs mb-4">Built from scratch in C++.</p>
+                         <div class="h-1 w-full bg-slate-800 rounded overflow-hidden">
+                            <div class="h-full bg-pink-500 w-1/2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Project 4 & 5 placeholders -->
+                    <div class="game-card p-6 border-slate-700 opacity-75">
+                         <h3 class="text-lg font-bold text-slate-500 mb-2">Project Delta</h3>
+                         <p class="text-slate-600 text-xs">Computer Vision Attendence</p>
+                    </div>
+                     <div class="game-card p-6 border-slate-700 opacity-75">
+                         <h3 class="text-lg font-bold text-slate-500 mb-2">Project Epsilon</h3>
+                         <p class="text-slate-600 text-xs">Decentralized Voting App</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Schedule / Quest Log -->
+            <section class="reveal max-w-3xl mx-auto">
+                <h2 class="pixel-font text-xl text-center text-yellow-400 mb-12 glitch" data-text="03. QUEST_LOG">03. QUEST_LOG</h2>
+                
+                <div class="relative pl-8 border-l-2 border-slate-800 space-y-12">
+                    <!-- Timeline Item -->
+                    <div class="relative">
+                        <div class="absolute -left-[41px] top-0 w-5 h-5 bg-black border-2 border-indigo-500 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="text-indigo-400 font-mono text-sm mb-1">18:00 - 18:10</div>
+                        <h3 class="text-white font-bold text-lg">System Boot & Vision</h3>
+                        <p class="text-slate-500 text-sm mt-2">Introduction by Chris Tahan & Founding Team.</p>
+                    </div>
+
+                    <div class="relative">
+                        <div class="absolute -left-[41px] top-0 w-5 h-5 bg-black border-2 border-slate-600 rounded-full"></div>
+                        <div class="text-green-400 font-mono text-sm mb-1">18:10 - 18:50</div>
+                        <h3 class="text-white font-bold text-lg">Lightning Showcase</h3>
+                        <p class="text-slate-500 text-sm mt-2">5 Demos. 8 Minutes Each. Pure Code.</p>
+                    </div>
+
+                     <div class="relative">
+                        <div class="absolute -left-[41px] top-0 w-5 h-5 bg-black border-2 border-slate-600 rounded-full"></div>
+                        <div class="text-pink-400 font-mono text-sm mb-1">18:50 - 19:00</div>
+                        <h3 class="text-white font-bold text-lg">Networking Protocol</h3>
+                        <p class="text-slate-500 text-sm mt-2">Mixer and team formation.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Terminal Section -->
+            <section class="game-card bg-black p-2 md:p-4 reveal">
+                <div class="bg-slate-900 px-4 py-2 flex items-center justify-between border-b border-slate-800 mb-2">
+                    <span class="text-xs text-slate-400 font-mono">bash -- tech-club-cli</span>
+                    <div class="flex gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                    </div>
+                </div>
+                <div class="h-64 overflow-y-auto font-mono text-sm p-4 space-y-2 text-green-400" id="terminal-output">
+                    <div class="text-slate-500">Last login: Tue Jan 12 18:32:01 on ttys001</div>
+                    <div>Welcome to TechClub CLI v1.0.0</div>
+                    <div>Type 'help' for available commands.</div>
+                </div>
+                <div class="flex items-center px-4 py-2 border-t border-slate-800">
+                    <span class="text-green-500 mr-2">$</span>
+                    <input type="text" id="terminal-input" class="bg-transparent border-none text-white w-full font-mono focus:outline-none" autocomplete="off" spellcheck="false" autofocus>
+                </div>
+            </section>
+
+             <!-- Final CTA -->
+            <section id="join" class="text-center space-y-8 pb-32 reveal">
+                <div class="pixel-font text-sm md:text-xl text-slate-400">SYSTEM READY FOR NEW USERS</div>
+                <div class="flex flex-col md:flex-row gap-6 justify-center">
+                    <a href="#" class="btn-pixel pixel-font text-[10px] md:text-xs text-black bg-green-500 hover:bg-green-400 p-4">JOIN_DISCORD_SERVER</a>
+                    <a href="#" class="btn-pixel pixel-font text-[10px] md:text-xs text-white bg-transparent border-2 border-white hover:bg-white hover:text-black p-4">REGISTER_ATTENDANCE</a>
+                </div>
+                <div class="text-slate-600 text-[10px] font-mono mt-12">
+                    INITIATIVE_LEADS: CHRIS_TAHAN & VICTORIA_C_ALAJEMBA<br>
+                    CAMPUS_ID: 2026-TC
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // --- BOOT SEQUENCE LOGIC ---
+        const bootText = [
+            "Initializing kernel...",
+            "Loading GPU drivers... OK",
+            "Mounting file system... OK",
+            "Connecting to Campus Network... SUCCESS",
+            "Checking user permissions... ADMIN",
+            "Loading assets...",
+            "Executing launch_event.exe...",
+            "WELCOME TO TECH CLUB."
+        ];
+
+        async function startBoot() {
+            const startBtn = document.getElementById('start-btn');
+            const startScreen = document.getElementById('start-screen');
+            const bootScreen = document.getElementById('boot-screen');
+            const bootContent = document.getElementById('boot-text');
+            const gameUI = document.getElementById('game-ui');
+
+            // Disable button
+            if(startBtn) startBtn.style.pointerEvents = 'none';
+
+            // Show Boot Screen
+            startScreen.classList.add('hidden');
+            bootScreen.classList.remove('hidden');
+            bootScreen.style.display = 'flex';
+
+            // Run Sequence
+            for (let line of bootText) {
+                const p = document.createElement('div');
+                p.textContent = `> ${line}`;
+                bootContent.appendChild(p);
+                await new Promise(r => setTimeout(r, Math.random() * 300 + 50));
+            }
+
+            await new Promise(r => setTimeout(r, 600));
+            
+            // --- CRITICAL VISIBILITY FORCE ---
+            // 1. Hide Boot Screen
+            bootScreen.style.display = 'none'; 
+            
+            // 2. Force Game UI Visibility directly via style
+            gameUI.style.opacity = '1';
+            gameUI.style.pointerEvents = 'auto';
+            
+            // 3. Trigger Resize to fix any canvas issues
+            if (typeof resize === 'function') resize();
+        }
+
+        // --- GAME LOGIC ---
+        let canvas, ctx, particles = [];
+        let mouse = { x: null, y: null, radius: 150 };
+
+        function initGame() {
+            canvas = document.getElementById('game-canvas');
+            if(!canvas) return;
+            
+            ctx = canvas.getContext('2d');
+            resize();
+            initParticles();
+            animate();
+            handleScroll();
+            setupTerminal();
+        }
+
+        function resize() {
+            if (!canvas) return; 
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.density = (Math.random() * 30) + 1;
+                this.color = Math.random() > 0.5 ? '#6366f1' : '#4ade80';
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+            }
+            update() {
+                if(!mouse.x) return;
+                
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+
+                if (distance < mouse.radius) {
+                    this.x -= directionX;
+                    this.y -= directionY;
+                } else {
+                    if (this.x !== this.baseX) {
+                        let dx = this.x - this.baseX;
+                        this.x -= dx/10;
+                    }
+                    if (this.y !== this.baseY) {
+                        let dy = this.y - this.baseY;
+                        this.y -= dy/10;
+                    }
+                }
+                this.y += Math.sin(Date.now() * 0.001 + this.density) * 0.1;
+            }
+        }
+
+        function initParticles() {
+            if(!canvas) return;
+            particles = [];
+            let numberOfParticles = (canvas.width * canvas.height) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            if(!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
+            ctx.lineWidth = 1;
+            for(let i = 0; i < particles.length; i++){
+                for(let j = i; j < particles.length; j++){
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    if(distance < 100){
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // --- SCROLL & REVEAL ---
+        function handleScroll() {
+            const reveals = document.querySelectorAll('.reveal');
+            const expBar = document.getElementById('exp-bar');
+            
+            const checkScroll = () => {
+                const scrolled = window.scrollY;
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrolled / maxScroll) * 100;
+                
+                if(expBar) expBar.style.width = scrollPercent + '%';
+
+                reveals.forEach(el => {
+                    const top = el.getBoundingClientRect().top;
+                    if (top < window.innerHeight - 50) {
+                        el.classList.remove('opacity-0', 'translate-y-10');
+                        el.classList.add('opacity-100', 'translate-y-0');
+                    }
+                });
+            };
+            
+            // Set initial state
+            reveals.forEach(el => el.classList.add('transition-all', 'duration-700', 'transform'));
+            window.addEventListener('scroll', checkScroll);
+            checkScroll(); 
+        }
+
+        // --- TERMINAL LOGIC ---
+        function setupTerminal() {
+            const input = document.getElementById('terminal-input');
+            const output = document.getElementById('terminal-output');
+            
+            if(!input || !output) return;
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = this.value.toLowerCase().trim();
+                    const line = document.createElement('div');
+                    line.innerHTML = `<span class="text-slate-400">$</span> <span class="text-white">${this.value}</span>`;
+                    output.appendChild(line);
+                    
+                    let response = '';
+                    switch(command) {
+                        case 'help':
+                            response = 'Available commands: help, date, whoami, join, clear, ide';
+                            break;
+                        case 'date':
+                            response = new Date().toString();
+                            break;
+                        case 'whoami':
+                            response = 'guest_user@university_campus';
+                            break;
+                        case 'join':
+                            response = 'Opening Discord invitation protocol...';
+                            break;
+                        case 'ide':
+                            response = 'Launching Adaptive IDE preview... [ERROR: MISSING_MODULE]';
+                            break;
+                        case 'clear':
+                            output.innerHTML = '';
+                            this.value = '';
+                            return;
+                        default:
+                            response = `Command not found: ${command}`;
+                    }
+                    
+                    if (response) {
+                        const resLine = document.createElement('div');
+                        resLine.className = 'text-green-300 mb-2';
+                        resLine.textContent = `> ${response}`;
+                        output.appendChild(resLine);
+                    }
+                    output.scrollTop = output.scrollHeight;
+                    this.value = '';
+                }
+            });
+        }
+
+        // --- INITIALIZATION ---
+        // Run init immediately on load (hidden) to prevent rendering glitches later
+        window.addEventListener('DOMContentLoaded', () => {
+            initGame();
+        });
+        
+        // Failsafe: If boot hangs, show UI after 8 seconds
+        setTimeout(() => {
+            const gameUI = document.getElementById('game-ui');
+            const bootScreen = document.getElementById('boot-screen');
+            if(getComputedStyle(gameUI).opacity === '0') {
+                console.log('Failsafe triggered');
+                bootScreen.style.display = 'none';
+                gameUI.style.opacity = '1';
+                gameUI.style.pointerEvents = 'auto';
+            }
+        }, 8000);
+
+    </script>
+</body>
+</html>
